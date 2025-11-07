@@ -1,0 +1,114 @@
+version: '3.8'
+
+services:
+  # Qdrant Vector Database (Local)
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: vault-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    environment:
+      - QDRANT__SERVICE__HTTP_PORT=6333
+      - QDRANT__SERVICE__GRPC_PORT=6334
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:6333/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - vault-network
+
+  # Ollama LLM Service (Local)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: vault-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - vault-network
+    # For GPU support (uncomment if you have NVIDIA GPU)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+  # OP Vault Application
+  vault-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vault-app
+    ports:
+      - "8100:8100"
+    volumes:
+      - ./web:/app/web
+      - ./static:/app/static
+    environment:
+      - OLLAMA_ENDPOINT=http://ollama:11434
+      - OLLAMA_EMBED_MODEL=nomic-embed-text
+      - OLLAMA_CHAT_MODEL=llama3
+      - QDRANT_API_ENDPOINT=http://qdrant:6333
+    depends_on:
+      - qdrant
+      - ollama
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8100/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - vault-network
+
+  # Model Downloader (runs once to download Ollama models)
+  ollama-setup:
+    image: ollama/ollama:latest
+    container_name: vault-ollama-setup
+    volumes:
+      - ollama_models:/root/.ollama
+    environment:
+      - OLLAMA_HOST=ollama:11434
+    depends_on:
+      - ollama
+    entrypoint: /bin/sh
+    command: >
+      -c "
+      echo 'Waiting for Ollama to be ready...';
+      sleep 10;
+      echo 'Pulling nomic-embed-text model...';
+      ollama pull nomic-embed-text;
+      echo 'Pulling llama3 model...';
+      ollama pull llama3;
+      echo 'Models downloaded successfully!';
+      echo 'You can also pull mistral or other models manually.';
+      "
+    networks:
+      - vault-network
+    restart: "no"
+
+volumes:
+  qdrant_storage:
+    driver: local
+  ollama_models:
+    driver: local
+
+networks:
+  vault-network:
+    driver: bridge

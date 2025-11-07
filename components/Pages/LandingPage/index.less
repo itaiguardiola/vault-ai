@@ -36,10 +36,37 @@ body {
     align-items: center;
     width: 100%;
 
+    .headerRow {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 1200px;
+        margin-bottom: 30px;
+    }
+
     h1 {
         font-size: 32px;
         font-weight: 200;
-        margin-bottom: 30px;
+        margin: 0;
+    }
+
+    .configLink {
+        padding: 10px 20px;
+        background: #4285f4;
+        color: white;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s;
+        white-space: nowrap;
+
+        &:hover {
+            background: #3367d6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+        }
     }
 
     .error {

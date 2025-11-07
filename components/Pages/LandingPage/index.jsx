@@ -149,7 +149,12 @@ const LandingPage = (props: Props): React.Node => {
             contentPreferredWidth={1300}
             contentClass={s.pageContent}>
             <div className={s.text}>
-                <h1>The "OP" Golang Question-Answering Stack</h1>
+                <div className={s.headerRow}>
+                    <h1>The "OP" Golang Question-Answering Stack</h1>
+                    <Go to="/config" className={s.configLink}>
+                        ⚙️ Settings
+                    </Go>
+                </div>
                 {errorMessage && <div className={s.error}>{errorMessage}</div>}
                 <div className={s.workArea}>
                     <div className={s.leftColumn}>

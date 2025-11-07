@@ -82,7 +82,15 @@ func main() {
 		log.Fatalln("ERROR INITIALIZING QDRANT:", err)
 	}
 
-	handlerContext := postapi.NewHandlerContext(llmClient, vectorDB)
+	// Initialize configuration manager
+	configPath := os.Getenv("CONFIG_PATH")
+	if configPath == "" {
+		configPath = "./config.json"
+	}
+	log.Printf("Initializing configuration manager: config_path=%s\n", configPath)
+	configManager := postapi.NewConfigManager(configPath)
+
+	handlerContext := postapi.NewHandlerContext(llmClient, vectorDB, configManager)
 
 	// Configure main web server
 	server := negroni.New()
@@ -96,6 +104,11 @@ func main() {
 	// Path Routing Rules: [POST]
 	mx.HandleFunc("/api/questions", handlerContext.QuestionHandler).Methods("POST")
 	mx.HandleFunc("/upload", handlerContext.UploadHandler).Methods("POST")
+
+	// Path Routing Rules: [GET/POST] Configuration
+	mx.HandleFunc("/api/config", handlerContext.ConfigGetHandler).Methods("GET")
+	mx.HandleFunc("/api/config", handlerContext.ConfigUpdateHandler).Methods("POST")
+	mx.HandleFunc("/api/config/test", handlerContext.ConfigTestHandler).Methods("GET")
 
 	// Path Routing Rules: Static Handlers
 	mx.HandleFunc("/github", StaticRedirectHandler("https://github.com/pashpashpash/vault"))

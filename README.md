@@ -5,6 +5,20 @@ OP Vault is a document-based question-answering system that allows you to upload
 **Original version**: [vault.pash.city](https://vault.pash.city) - used OpenAI + Pinecone (cloud-based)
 **This version**: Fully local - uses Ollama + Qdrant (no internet required)
 
+## 🚀 Quick Start with Docker (Recommended!)
+
+The easiest way to run OP Vault is with Docker:
+
+```bash
+docker-compose up
+```
+
+Then visit **http://localhost:8100** and you're ready to go!
+
+**First-time setup** takes 5-10 minutes to download models. See [DOCKER_SETUP.md](DOCKER_SETUP.md) for full Docker documentation.
+
+---
+
 <img width="512" alt="Screen Shot 2023-04-09 at 1 53 33 AM" src="/static/img/common/vault_library.png">
 
 With quick setup, you can launch your own version of this Golang server along with a user-friendly React frontend that allows users to ask OpenAI questions about the specific knowledge base provided. The primary focus is on human-readable content like books, letters, and other documents, making it a practical and valuable tool for knowledge extraction and question-answering. You can upload an entire library's worth of books and documents and recieve pointed answers along with the name of the file and specific section within the file that the answer is based on!
@@ -18,10 +32,19 @@ With The Vault, you can:
 -   Upload a variety of popular document types via a simple react frontend to create a custom knowledge base
 -   Retrieve accurate and relevant answers based on the content of your uploaded documents
 -   See the filenames and specific context snippets that inform the answer
--   Explore the power of the OP Stack (OpenAI + Pinecone Vector Database) in a user-friendly interface
+-   Explore the power of local AI models in a user-friendly interface
 -   Load entire libraries' worth of books into The Vault
+-   **Configure settings** through the built-in web UI at http://localhost:8100/config
 
-## Manual Dependencies
+## Setup Options
+
+Choose your preferred setup method:
+
+- **🐳 [Docker Setup](DOCKER_SETUP.md)** (Recommended) - One command, everything containerized
+- **💻 [Local Setup](SETUP_LOCAL.md)** - Manual installation for more control
+- Both methods work completely offline after initial setup!
+
+## Manual Dependencies (for Local Setup)
 
 -   node: v19+ (tested with v22)
 -   go: v1.18.9+ (tested with v1.24.7)

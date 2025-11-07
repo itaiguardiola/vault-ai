@@ -8,15 +8,17 @@ import (
 )
 
 type HandlerContext struct {
-	llmClient llm.Client
-	cache     *cache.Cache
-	vectorDB  vectordb.VectorDB
+	llmClient     llm.Client
+	cache         *cache.Cache
+	vectorDB      vectordb.VectorDB
+	configManager *ConfigManager
 }
 
-func NewHandlerContext(llmClient llm.Client, vectorDB vectordb.VectorDB) *HandlerContext {
+func NewHandlerContext(llmClient llm.Client, vectorDB vectordb.VectorDB, configManager *ConfigManager) *HandlerContext {
 	return &HandlerContext{
-		llmClient: llmClient,
-		cache:     cache.New(cache.NoExpiration, cache.NoExpiration),
-		vectorDB:  vectorDB,
+		llmClient:     llmClient,
+		cache:         cache.New(cache.NoExpiration, cache.NoExpiration),
+		vectorDB:      vectorDB,
+		configManager: configManager,
 	}
 }
