@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/pashpashpash/vault/chunk"
-	openai "github.com/sashabaranov/go-openai"
 )
 
 type UploadResponse struct {
@@ -41,15 +40,10 @@ func (ctx *HandlerContext) UploadHandler(w http.ResponseWriter, r *http.Request)
 
 	files := r.MultipartForm.File["files"]
 	uuid := r.FormValue("uuid") // Get the UUID from the form data
-	userProvidedOpenApiKey := r.FormValue("apikey")
 
 	log.Println("[UploadHandler] UUID=", uuid)
 
-	clientToUse := ctx.openAIClient
-	if userProvidedOpenApiKey != "" {
-		log.Println("[UploadHandler] Using provided custom API key:", userProvidedOpenApiKey)
-		clientToUse = openai.NewClient(userProvidedOpenApiKey)
-	}
+	clientToUse := ctx.llmClient
 
 	responseData := UploadResponse{
 		SuccessfulFileNames: make([]string, 0),
@@ -119,7 +113,7 @@ func (ctx *HandlerContext) UploadHandler(w http.ResponseWriter, r *http.Request)
 			continue
 		}
 
-		embeddings, err := getEmbeddings(clientToUse, chunks, 100, openai.AdaEmbeddingV2)
+		embeddings, err := clientToUse.GetEmbeddings(chunks, 10)
 		if err != nil {
 			errMsg := fmt.Sprintf("Error getting embeddings: %v", err)
 			log.Println("[UploadHandler ERR]", errMsg)

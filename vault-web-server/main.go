@@ -16,14 +16,12 @@ import (
 	"compress/gzip"
 	"io"
 
+	"github.com/pashpashpash/vault/llm/ollama"
 	"github.com/pashpashpash/vault/serverutil"
 	"github.com/pashpashpash/vault/vectordb"
-	"github.com/pashpashpash/vault/vectordb/pinecone"
 	"github.com/pashpashpash/vault/vectordb/qdrant"
 
 	"github.com/pashpashpash/vault/vault-web-server/postapi"
-
-	openai "github.com/sashabaranov/go-openai"
 
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
@@ -51,41 +49,40 @@ func main() {
 	siteConfig["DEBUG_SITE"] = strconv.FormatBool(*debugSite)
 	rand.Seed(time.Now().UnixNano())
 
-	openaiApiKey := os.Getenv("OPENAI_API_KEY")
-	if len(openaiApiKey) == 0 {
-		log.Fatalln("MISSING OPENAI API KEY ENV VARIABLE")
+	// Initialize Ollama client (local LLM)
+	ollamaEndpoint := os.Getenv("OLLAMA_ENDPOINT")
+	if ollamaEndpoint == "" {
+		ollamaEndpoint = "http://localhost:11434"
 	}
-	openaiClient := openai.NewClient(openaiApiKey)
+	ollamaEmbedModel := os.Getenv("OLLAMA_EMBED_MODEL")
+	if ollamaEmbedModel == "" {
+		ollamaEmbedModel = "nomic-embed-text"
+	}
+	ollamaChatModel := os.Getenv("OLLAMA_CHAT_MODEL")
+	if ollamaChatModel == "" {
+		ollamaChatModel = "llama3"
+	}
 
+	log.Printf("Initializing Ollama client: endpoint=%s, embed_model=%s, chat_model=%s\n",
+		ollamaEndpoint, ollamaEmbedModel, ollamaChatModel)
+	llmClient := ollama.NewClient(ollamaEndpoint, ollamaEmbedModel, ollamaChatModel)
+
+	// Initialize Qdrant vector database (local)
 	var vectorDB vectordb.VectorDB
 	var err error
 
 	qdrantApiEndpoint := os.Getenv("QDRANT_API_ENDPOINT")
-	if len(qdrantApiEndpoint) != 0 {
-		vectorDB, err = qdrant.New(qdrantApiEndpoint)
-		if err != nil {
-			log.Fatalln("ERROR INITIALIZING QDRANT:", err)
-		}
+	if qdrantApiEndpoint == "" {
+		qdrantApiEndpoint = "http://localhost:6333"
 	}
 
-	pineconeApiEndpoint := os.Getenv("PINECONE_API_ENDPOINT")
-	if len(pineconeApiEndpoint) != 0 {
-		pineconeApiKey := os.Getenv("PINECONE_API_KEY")
-		if len(pineconeApiKey) == 0 {
-			log.Fatalln("MISSING PINECONE API KEY ENV VARIABLE")
-		}
-
-		vectorDB, err = pinecone.New(pineconeApiEndpoint, pineconeApiKey)
-		if err != nil {
-			log.Fatalln("ERROR INITIALIZING PINECONE:", err)
-		}
+	log.Printf("Initializing Qdrant vector database: endpoint=%s\n", qdrantApiEndpoint)
+	vectorDB, err = qdrant.New(qdrantApiEndpoint)
+	if err != nil {
+		log.Fatalln("ERROR INITIALIZING QDRANT:", err)
 	}
 
-	if vectorDB == nil {
-		log.Fatalln("NO VECTOR DB CONFIGURED (QDRANT_API_ENDPOINT or PINECONE_API_ENDPOINT)")
-	}
-
-	handlerContext := postapi.NewHandlerContext(openaiClient, vectorDB)
+	handlerContext := postapi.NewHandlerContext(llmClient, vectorDB)
 
 	// Configure main web server
 	server := negroni.New()

@@ -1,12 +1,13 @@
 package postapi
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/pashpashpash/vault/form"
-	openai "github.com/sashabaranov/go-openai"
 )
 
 type Context struct {
@@ -31,16 +32,13 @@ func (ctx *HandlerContext) QuestionHandler(w http.ResponseWriter, r *http.Reques
 	log.Println("[QuestionHandler] Question:", form.Question)
 	log.Println("[QuestionHandler] Model:", form.Model)
 	log.Println("[QuestionHandler] UUID:", form.UUID)
-	log.Println("[QuestionHandler] ApiKey:", form.ApiKey)
 
-	clientToUse := ctx.openAIClient
-	if form.ApiKey != "" {
-		log.Println("[QuestionHandler] Using provided custom API key:", form.ApiKey)
-		clientToUse = openai.NewClient(form.ApiKey)
-	}
+	clientToUse := ctx.llmClient
 
-	// step 1: Feed question to openai embeddings api to get an embedding back
-	questionEmbedding, err := getEmbedding(clientToUse, form.Question, openai.AdaEmbeddingV2)
+	// step 1: Feed question to local LLM embeddings api to get an embedding back
+	ctxWithTimeout, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+	questionEmbedding, err := clientToUse.GetEmbedding(ctxWithTimeout, form.Question)
 	if err != nil {
 		log.Println("[QuestionHandler ERR] OpenAI get embedding request error\n", err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -81,24 +79,27 @@ func (ctx *HandlerContext) QuestionHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	model := openai.GPT3Dot5Turbo
-	if form.Model == "GPT Davinci" {
-		model = openai.GPT3TextDavinci003
-	}
+	log.Printf("[QuestionHandler] Sending local LLM api request...\nPrompt:%s\n", prompt)
 
-	log.Printf("[QuestionHandler] Sending OpenAI api request...\nPrompt:%s\n", prompt)
-	openAIResponse, tokens, err := callOpenAI(clientToUse, prompt, model,
+	llmCtx, llmCancel := context.WithTimeout(context.Background(), 120*time.Second)
+	defer llmCancel()
+
+	llmResponse, err := clientToUse.CreateChatCompletionSimple(
+		llmCtx,
+		prompt,
 		"You are a helpful assistant answering questions based on the context provided.",
-		512)
+		512,
+		0.7,
+	)
 
 	if err != nil {
-		log.Println("[QuestionHandler ERR] OpenAI answer questions request error\n", err.Error())
+		log.Println("[QuestionHandler ERR] LLM answer questions request error\n", err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	log.Println("[QuestionHandler] OpenAI response:\n", openAIResponse)
-	response := OpenAIResponse{openAIResponse, tokens}
+	log.Println("[QuestionHandler] LLM response:\n", llmResponse)
+	response := OpenAIResponse{llmResponse, 0} // tokens not tracked for local models
 
 	answer := Answer{response.Response, contexts, response.Tokens}
 	jsonResponse, err := json.Marshal(answer)

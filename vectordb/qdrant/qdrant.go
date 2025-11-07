@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	VECTOR_SIZE     = 1536 // ada002
+	VECTOR_SIZE     = 768 // nomic-embed-text (local Ollama model)
 	VECTOR_DISTANCE = "Cosine"
 	BATCH_SIZE      = 500
 )
