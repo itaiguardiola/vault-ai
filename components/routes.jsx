@@ -6,6 +6,7 @@ import { BrowserRouter, Route, Switch } from 'react-router-dom';
 
 const LandingPage = lazy(() => import('./Pages/LandingPage'));
 const ConfigPage = lazy(() => import('./Pages/ConfigPage'));
+const DocumentsPage = lazy(() => import('./Pages/DocumentsPage'));
 const Header = lazy(() => import('./Header/index'));
 
 const loading = (
@@ -114,6 +115,12 @@ class AppRouting extends React.Component<Props, State> {
                                     exact
                                     path="/config"
                                     component={ConfigPage}
+                                    change={this.handlePageChange}
+                                />
+                                <NugRoute
+                                    exact
+                                    path="/documents"
+                                    component={DocumentsPage}
                                     change={this.handlePageChange}
                                 />
                             </Switch>

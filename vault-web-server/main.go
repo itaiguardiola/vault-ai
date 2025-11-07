@@ -110,6 +110,12 @@ func main() {
 	mx.HandleFunc("/api/config", handlerContext.ConfigUpdateHandler).Methods("POST")
 	mx.HandleFunc("/api/config/test", handlerContext.ConfigTestHandler).Methods("GET")
 
+	// Path Routing Rules: Document Management
+	mx.HandleFunc("/api/documents", handlerContext.DocumentsListHandler).Methods("GET")
+	mx.HandleFunc("/api/documents/{uuid}", handlerContext.DocumentsGetHandler).Methods("GET")
+	mx.HandleFunc("/api/documents/{uuid}", handlerContext.DocumentsDeleteHandler).Methods("DELETE")
+	mx.HandleFunc("/api/documents/{uuid}/stats", handlerContext.CollectionStatsHandler).Methods("GET")
+
 	// Path Routing Rules: Static Handlers
 	mx.HandleFunc("/github", StaticRedirectHandler("https://github.com/pashpashpash/vault"))
 	mx.PathPrefix("/").Handler(ReactFileServer(http.Dir(serverutil.WebAbs(""))))

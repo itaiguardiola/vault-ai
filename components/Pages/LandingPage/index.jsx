@@ -151,9 +151,14 @@ const LandingPage = (props: Props): React.Node => {
             <div className={s.text}>
                 <div className={s.headerRow}>
                     <h1>The "OP" Golang Question-Answering Stack</h1>
-                    <Go to="/config" className={s.configLink}>
-                        ⚙️ Settings
-                    </Go>
+                    <div className={s.headerActions}>
+                        <Go to="/documents" className={s.documentsLink}>
+                            📚 Documents
+                        </Go>
+                        <Go to="/config" className={s.configLink}>
+                            ⚙️ Settings
+                        </Go>
+                    </div>
                 </div>
                 {errorMessage && <div className={s.error}>{errorMessage}</div>}
                 <div className={s.workArea}>

@@ -219,3 +219,176 @@ func (q *Qdrant) Retrieve(questionEmbedding []float32, topK int, uuid string) ([
 
 	return queryMatches, nil
 }
+
+// ListCollections lists all collections in Qdrant
+func (q *Qdrant) ListCollections() ([]vectordb.CollectionInfo, error) {
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/collections", q.Endpoint), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to list collections, status code: %d", resp.StatusCode)
+	}
+
+	var result struct {
+		Result struct {
+			Collections []struct {
+				Name string `json:"name"`
+			} `json:"collections"`
+		} `json:"result"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, err
+	}
+
+	// Get detailed info for each collection
+	collections := make([]vectordb.CollectionInfo, 0)
+	for _, coll := range result.Result.Collections {
+		info, err := q.GetCollectionInfo(coll.Name)
+		if err != nil {
+			// Skip collections we can't read
+			continue
+		}
+		collections = append(collections, *info)
+	}
+
+	return collections, nil
+}
+
+// GetCollectionInfo gets information about a specific collection
+func (q *Qdrant) GetCollectionInfo(uuid string) (*vectordb.CollectionInfo, error) {
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/collections/%s", q.Endpoint, uuid), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, fmt.Errorf("collection not found: %s", uuid)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to get collection info, status code: %d", resp.StatusCode)
+	}
+
+	var result struct {
+		Result struct {
+			PointsCount int `json:"points_count"`
+			Config      struct {
+				Params struct {
+					Vectors struct {
+						Size int `json:"size"`
+					} `json:"vectors"`
+				} `json:"params"`
+			} `json:"config"`
+		} `json:"result"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, err
+	}
+
+	return &vectordb.CollectionInfo{
+		Name:       uuid,
+		PointCount: result.Result.PointsCount,
+		VectorSize: result.Result.Config.Params.Vectors.Size,
+	}, nil
+}
+
+// GetDocuments gets all unique documents in a collection
+func (q *Qdrant) GetDocuments(uuid string) ([]vectordb.DocumentInfo, error) {
+	// Scroll through all points to get unique document names
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/collections/%s/points/scroll", q.Endpoint, uuid),
+		bytes.NewBuffer([]byte(`{"limit":1000,"with_payload":true,"with_vector":false}`)))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to scroll points, status code: %d", resp.StatusCode)
+	}
+
+	var result struct {
+		Result struct {
+			Points []struct {
+				Payload map[string]interface{} `json:"payload"`
+			} `json:"points"`
+		} `json:"result"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, err
+	}
+
+	// Group by document name (title)
+	docMap := make(map[string]*vectordb.DocumentInfo)
+	for _, point := range result.Result.Points {
+		if title, ok := point.Payload["title"].(string); ok && title != "" {
+			if _, exists := docMap[title]; !exists {
+				docMap[title] = &vectordb.DocumentInfo{
+					Name:       title,
+					ChunkCount: 0,
+					Titles:     []string{title},
+				}
+			}
+			docMap[title].ChunkCount++
+		}
+	}
+
+	// Convert map to slice
+	documents := make([]vectordb.DocumentInfo, 0, len(docMap))
+	for _, doc := range docMap {
+		documents = append(documents, *doc)
+	}
+
+	return documents, nil
+}
+
+// DeleteCollection deletes an entire collection
+func (q *Qdrant) DeleteCollection(uuid string) error {
+	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%s/collections/%s", q.Endpoint, uuid), nil)
+	if err != nil {
+		return err
+	}
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body := make([]byte, 1024)
+		resp.Body.Read(body)
+		return fmt.Errorf("failed to delete collection, status code: %d, body: %s", resp.StatusCode, string(body))
+	}
+
+	// Remove from cache
+	q.cache.Delete(uuid)
+
+	return nil
+}

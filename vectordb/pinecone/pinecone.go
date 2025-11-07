@@ -167,3 +167,20 @@ func float32sToBytes(floats []float32) []byte {
 	}
 	return result
 }
+
+// Stub implementations for document management (not implemented for Pinecone)
+func (p *Pinecone) ListCollections() ([]vectordb.CollectionInfo, error) {
+	return nil, fmt.Errorf("document management not implemented for Pinecone")
+}
+
+func (p *Pinecone) GetCollectionInfo(uuid string) (*vectordb.CollectionInfo, error) {
+	return nil, fmt.Errorf("document management not implemented for Pinecone")
+}
+
+func (p *Pinecone) GetDocuments(uuid string) ([]vectordb.DocumentInfo, error) {
+	return nil, fmt.Errorf("document management not implemented for Pinecone")
+}
+
+func (p *Pinecone) DeleteCollection(uuid string) error {
+	return fmt.Errorf("document management not implemented for Pinecone")
+}
