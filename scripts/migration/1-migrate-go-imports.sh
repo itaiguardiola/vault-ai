@@ -19,7 +19,7 @@ echo ""
 # Update go.mod
 echo "Updating go.mod module path..."
 if [ -f "go.mod" ]; then
-    sed -i.bak 's|module github.com/pashpashpash/vault|module github.com/pashpashpash/askara|g' go.mod
+    sed -i.bak 's|module github.com/pashpashpash/vault|module github.com/itaiguardiola/askara|g' go.mod
     echo "  ✓ go.mod updated"
 else
     echo "  ✗ go.mod not found!"
@@ -34,7 +34,7 @@ COUNT=0
 
 for file in $GO_FILES; do
     if grep -q "github.com/pashpashpash/vault" "$file"; then
-        sed -i.bak 's|github.com/pashpashpash/vault|github.com/pashpashpash/askara|g' "$file"
+        sed -i.bak 's|github.com/pashpashpash/vault|github.com/itaiguardiola/askara|g' "$file"
         echo "  ✓ Updated: $file"
         ((COUNT++))
     fi

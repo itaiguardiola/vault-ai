@@ -43,9 +43,9 @@ for doc in "${DOCS[@]}"; do
         sed -i 's/vault-web-server/askara-web-server/g' "$doc"
 
         # Update repository references (but not URLs to vault.pash.city)
-        sed -i 's|github.com/pashpashpash/vault\([^.]\)|github.com/pashpashpash/askara\1|g' "$doc"
-        sed -i 's|pashpashpash/vault#|pashpashpash/askara#|g' "$doc"
-        sed -i 's|pashpashpash/vault/|pashpashpash/askara/|g' "$doc"
+        sed -i 's|github.com/pashpashpash/vault\([^.]\)|github.com/itaiguardiola/askara\1|g' "$doc"
+        sed -i 's|pashpashpash/vault#|itaiguardiola/askara#|g' "$doc"
+        sed -i 's|pashpashpash/vault/|itaiguardiola/askara/|g' "$doc"
 
         # Update image references
         sed -i 's|vault_library.png|askara_library.png|g' "$doc"

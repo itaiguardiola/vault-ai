@@ -27,7 +27,7 @@ if [ -f "package.json" ]; then
     sed -i 's/vault core website/askara core website/g' package.json
 
     # Repository URLs
-    sed -i 's|pashpashpash/vault|pashpashpash/askara|g' package.json
+    sed -i 's|pashpashpash/vault|itaiguardiola/askara|g' package.json
 
     # Script paths
     sed -i 's|./vault-web-server|./askara-web-server|g' package.json
