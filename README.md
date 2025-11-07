@@ -30,10 +30,12 @@ With quick setup, you can launch your own version of this Golang server along wi
 With The Vault, you can:
 
 -   Upload a variety of popular document types via a simple react frontend to create a custom knowledge base
+-   **OCR support** for scanned PDFs and images - automatically extracts text using Tesseract
 -   Retrieve accurate and relevant answers based on the content of your uploaded documents
 -   See the filenames and specific context snippets that inform the answer
 -   Explore the power of local AI models in a user-friendly interface
 -   Load entire libraries' worth of books into The Vault
+-   **Manage documents** through the built-in Document Library at http://localhost:8100/documents
 -   **Configure settings** through the built-in web UI at http://localhost:8100/config
 
 ## Setup Options
@@ -49,6 +51,7 @@ Choose your preferred setup method:
 -   node: v19+ (tested with v22)
 -   go: v1.18.9+ (tested with v1.24.7)
 -   poppler (for PDF text extraction)
+-   tesseract-ocr (for scanned PDF and image text extraction)
 -   Docker (for running Qdrant vector database)
 -   Ollama (for local LLM and embeddings)
 
@@ -66,6 +69,11 @@ I recommend [installing nvm and using it to install node v19+](https://medium.co
 - Ubuntu/Debian: `sudo apt-get install -y poppler-utils`
 - Mac: `brew install poppler`
 - Fedora/RHEL: `sudo dnf install poppler-utils`
+
+**Install Tesseract OCR:**
+- Ubuntu/Debian: `sudo apt-get install -y tesseract-ocr tesseract-ocr-eng`
+- Mac: `brew install tesseract`
+- Fedora/RHEL: `sudo dnf install tesseract tesseract-langpack-eng`
 
 **Install Docker:**
 Follow the Docker docs [here](https://docs.docker.com/get-docker/)
@@ -271,7 +279,23 @@ The max individual file size is set to 25MB and total upload size to 50MB. If yo
 
 ### Supported Filetypes
 
-PDFs, .txt, .rtf, .docx, .epub, and plaintext.
+**Document Files:**
+- PDFs (text-based and scanned with automatic OCR fallback)
+- Text files (.txt, .rtf)
+- Word documents (.doc, .docx)
+- EPUB files (.epub)
+- Pages files (.pages)
+- Plaintext
+
+**Image Files (with OCR):**
+- PNG (.png)
+- JPEG (.jpg, .jpeg)
+- GIF (.gif)
+- TIFF (.tiff, .tif)
+- BMP (.bmp)
+- WebP (.webp)
+
+**Note:** The system automatically detects scanned PDFs and image-based documents, falling back to OCR extraction when needed. See [OCR_FEATURE.md](OCR_FEATURE.md) for details.
 
 ## Troubleshooting
 

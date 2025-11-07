@@ -24,6 +24,7 @@ import (
 
 	"code.sajari.com/docconv"
 	"github.com/gen2brain/go-fitz"
+	gosseract "github.com/otiai10/gosseract/v2"
 )
 
 type Chunk struct {
@@ -152,6 +153,12 @@ func GetTextFromFile(f multipart.File) (string, error) {
 			pageText = strings.ReplaceAll(pageText, "\n", " ")
 			text += pageText
 		}
+	case "image/png", "image/jpeg", "image/jpg", "image/gif", "image/tiff", "image/bmp", "image/webp": // Image files
+		log.Printf("[GetTextfromFile] Image file encountered (%s), using OCR...", contentType)
+		text, err = extractTextFromImage(content, contentType)
+		if err != nil {
+			return "", fmt.Errorf("error extracting text from image: %v", err)
+		}
 	default: // Assume plain text
 		detector := chardet.NewTextDetector()
 		result, err := detector.DetectBest(content)
@@ -183,7 +190,146 @@ func GetTextFromFile(f multipart.File) (string, error) {
 	return text, nil
 }
 
+// isTextSufficientForProcessing checks if extracted text is meaningful
+// Returns false if text appears to be from a scanned/image-based PDF
+func isTextSufficientForProcessing(text string) bool {
+	trimmed := strings.TrimSpace(text)
+
+	// Check if text is too short
+	if len(trimmed) < 50 {
+		return false
+	}
+
+	// Count words (split by whitespace)
+	words := strings.Fields(trimmed)
+	if len(words) < 10 {
+		return false
+	}
+
+	// Check for meaningful text (not just numbers or special characters)
+	alphaCount := 0
+	for _, r := range trimmed {
+		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') {
+			alphaCount++
+		}
+	}
+
+	// If less than 20% alphabetic characters, likely not meaningful text
+	if float64(alphaCount)/float64(len(trimmed)) < 0.2 {
+		return false
+	}
+
+	return true
+}
+
+// extractTextFromPDFWithOCR uses Tesseract OCR to extract text from image-based PDFs
+func extractTextFromPDFWithOCR(f multipart.File) (string, error) {
+	log.Println("[OCR] Attempting OCR extraction for scanned PDF...")
+
+	// Reset file position
+	_, err := f.Seek(0, io.SeekStart)
+	if err != nil {
+		return "", fmt.Errorf("failed to reset file position: %v", err)
+	}
+
+	// Read file content
+	content, err := ioutil.ReadAll(f)
+	if err != nil {
+		return "", fmt.Errorf("failed to read file: %v", err)
+	}
+
+	// Open PDF with go-fitz to render pages as images
+	fitzDoc, err := fitz.NewFromMemory(content)
+	if err != nil {
+		return "", fmt.Errorf("failed to open PDF with fitz: %v", err)
+	}
+	defer fitzDoc.Close()
+
+	var fullText strings.Builder
+
+	// Process each page
+	for pageNum := 0; pageNum < fitzDoc.NumPage(); pageNum++ {
+		log.Printf("[OCR] Processing page %d/%d...", pageNum+1, fitzDoc.NumPage())
+
+		// Render page as image (PNG format, 300 DPI for good OCR quality)
+		img, err := fitzDoc.Image(pageNum)
+		if err != nil {
+			log.Printf("[OCR] Warning: failed to render page %d: %v", pageNum, err)
+			continue
+		}
+
+		// Convert image to bytes
+		var imgBuffer bytes.Buffer
+		err = fitz.ImagePNG(&imgBuffer, img)
+		if err != nil {
+			log.Printf("[OCR] Warning: failed to encode page %d as PNG: %v", pageNum, err)
+			continue
+		}
+
+		// Use Tesseract to extract text from image
+		client := gosseract.NewClient()
+		defer client.Close()
+
+		err = client.SetImageFromBytes(imgBuffer.Bytes())
+		if err != nil {
+			log.Printf("[OCR] Warning: failed to set image for page %d: %v", pageNum, err)
+			continue
+		}
+
+		// Set language to English (can be extended to support more languages)
+		client.SetLanguage("eng")
+
+		// Extract text
+		pageText, err := client.Text()
+		if err != nil {
+			log.Printf("[OCR] Warning: failed to extract text from page %d: %v", pageNum, err)
+			continue
+		}
+
+		fullText.WriteString(pageText)
+		fullText.WriteString("\n\n")
+	}
+
+	result := strings.TrimSpace(fullText.String())
+	log.Printf("[OCR] Successfully extracted %d characters from %d pages", len(result), fitzDoc.NumPage())
+
+	return result, nil
+}
+
+// extractTextFromImage uses Tesseract OCR to extract text from image files
+func extractTextFromImage(content []byte, contentType string) (string, error) {
+	log.Printf("[OCR] Extracting text from image (%s)...", contentType)
+
+	// Use Tesseract to extract text from image
+	client := gosseract.NewClient()
+	defer client.Close()
+
+	err := client.SetImageFromBytes(content)
+	if err != nil {
+		return "", fmt.Errorf("failed to set image: %v", err)
+	}
+
+	// Set language to English (can be extended to support more languages)
+	client.SetLanguage("eng")
+
+	// Extract text
+	text, err := client.Text()
+	if err != nil {
+		return "", fmt.Errorf("failed to extract text: %v", err)
+	}
+
+	result := strings.TrimSpace(text)
+	log.Printf("[OCR] Successfully extracted %d characters from image", len(result))
+
+	if !isTextSufficientForProcessing(result) {
+		return "", fmt.Errorf("OCR extraction yielded insufficient text (%d characters)", len(result))
+	}
+
+	return result, nil
+}
+
 // extract human-readable text from a given pdf with support for spaces/whitespace.
+// Automatically falls back to OCR if regular text extraction yields insufficient text.
 func ExtractTextFromPDF(f multipart.File, fileSize int64) (string, error) {
 	// Reset the file reader's position
 	_, err := f.Seek(0, io.SeekStart)
@@ -191,14 +337,39 @@ func ExtractTextFromPDF(f multipart.File, fileSize int64) (string, error) {
 		return "", err
 	}
 
-	// Convert the uploaded file to a human-readable text
+	// Try regular text extraction first (fastest method)
+	log.Println("[PDF] Attempting regular text extraction...")
 	bodyResult, _, err := docconv.ConvertPDF(f)
-	if err != nil {
-		return "", err
-	}
 
 	// Remove extra whitespace and newlines
 	text := strings.TrimSpace(bodyResult)
 
-	return text, nil
+	// Check if extraction was successful and yielded sufficient text
+	if err == nil && isTextSufficientForProcessing(text) {
+		log.Printf("[PDF] Successfully extracted %d characters using regular method", len(text))
+		return text, nil
+	}
+
+	// Regular extraction failed or yielded insufficient text
+	// This likely means it's a scanned/image-based PDF
+	if err != nil {
+		log.Printf("[PDF] Regular extraction failed: %v", err)
+	} else {
+		log.Printf("[PDF] Regular extraction yielded insufficient text (%d characters, %d words)", len(text), len(strings.Fields(text)))
+	}
+
+	// Fall back to OCR
+	log.Println("[PDF] Falling back to OCR extraction...")
+	ocrText, ocrErr := extractTextFromPDFWithOCR(f)
+	if ocrErr != nil {
+		return "", fmt.Errorf("both regular extraction and OCR failed: regular=%v, ocr=%v", err, ocrErr)
+	}
+
+	// Check if OCR yielded sufficient text
+	if !isTextSufficientForProcessing(ocrText) {
+		return "", fmt.Errorf("OCR extraction yielded insufficient text (%d characters)", len(ocrText))
+	}
+
+	log.Printf("[PDF] OCR extraction successful: %d characters extracted", len(ocrText))
+	return ocrText, nil
 }

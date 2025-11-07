@@ -7,7 +7,9 @@ RUN apk add --no-cache \
     go \
     git \
     build-base \
-    poppler-utils
+    poppler-utils \
+    tesseract-ocr \
+    tesseract-ocr-data-eng
 
 # Set Go environment
 ENV GOPATH=/go
@@ -41,6 +43,8 @@ FROM node:19-alpine
 # Install runtime dependencies
 RUN apk add --no-cache \
     poppler-utils \
+    tesseract-ocr \
+    tesseract-ocr-data-eng \
     ca-certificates
 
 WORKDIR /app
