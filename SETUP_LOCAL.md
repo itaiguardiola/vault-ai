@@ -1,6 +1,6 @@
-# Local Setup Guide - OP Vault
+# Local Setup Guide - Askara
 
-This guide will help you set up OP Vault to run **completely locally** without internet.
+This guide will help you set up Askara to run **completely locally** without internet.
 
 ## Initial Setup (Requires Internet - One Time Only)
 
@@ -111,10 +111,10 @@ npm start
 - `llm/ollama/ollama.go` - Ollama client implementation
 
 ### Modified Files:
-- `vault-web-server/main.go` - Initialize Ollama instead of OpenAI
-- `vault-web-server/postapi/handlercontext.go` - Use LLM interface
-- `vault-web-server/postapi/fileupload.go` - Use Ollama embeddings
-- `vault-web-server/postapi/questions.go` - Use Ollama chat
+- `askara-web-server/main.go` - Initialize Ollama instead of OpenAI
+- `askara-web-server/postapi/handlercontext.go` - Use LLM interface
+- `askara-web-server/postapi/fileupload.go` - Use Ollama embeddings
+- `askara-web-server/postapi/questions.go` - Use Ollama chat
 - `vectordb/qdrant/qdrant.go` - Update vector dimensions to 768
 
 ### Removed Dependencies:

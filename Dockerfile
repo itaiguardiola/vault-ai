@@ -1,4 +1,4 @@
-# Multi-stage build for OP Vault Local Edition
+# Multi-stage build for Askara
 # Stage 1: Build frontend and backend
 FROM node:19-alpine AS builder
 
@@ -34,8 +34,8 @@ COPY . .
 RUN npm run build || webpack --mode production
 
 # Build backend
-RUN cd vault-web-server && \
-    go build -o ../bin/vault-web-server .
+RUN cd askara-web-server && \
+    go build -o ../bin/askara-web-server .
 
 # Stage 2: Runtime image
 FROM node:19-alpine
@@ -50,7 +50,7 @@ RUN apk add --no-cache \
 WORKDIR /app
 
 # Copy built artifacts from builder
-COPY --from=builder /app/bin/vault-web-server /app/bin/vault-web-server
+COPY --from=builder /app/bin/askara-web-server /app/bin/askara-web-server
 COPY --from=builder /app/static /app/static
 COPY --from=builder /app/web /app/web
 COPY --from=builder /app/serverutil /app/serverutil
@@ -72,4 +72,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:8100/ || exit 1
 
 # Run the application
-CMD ["/app/bin/vault-web-server"]
+CMD ["/app/bin/askara-web-server"]

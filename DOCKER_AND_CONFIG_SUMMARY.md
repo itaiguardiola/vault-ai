@@ -2,7 +2,7 @@
 
 ## 🎉 New Features Added
 
-This update adds two major features that make OP Vault incredibly easy to use:
+This update adds two major features that make Askara incredibly easy to use:
 
 1. **🐳 Complete Docker Support** - One-command deployment
 2. **⚙️ Web-based Configuration UI** - Easy settings management
@@ -100,9 +100,9 @@ Or click the "⚙️ Settings" button on the main page.
 ### Files Added
 
 **Backend:**
-- `vault-web-server/postapi/config.go` - Configuration management API
-- Updated: `vault-web-server/main.go` - ConfigManager initialization
-- Updated: `vault-web-server/postapi/handlercontext.go` - Add ConfigManager
+- `askara-web-server/postapi/config.go` - Configuration management API
+- Updated: `askara-web-server/main.go` - ConfigManager initialization
+- Updated: `askara-web-server/postapi/handlercontext.go` - Add ConfigManager
 
 **Frontend:**
 - `components/Pages/ConfigPage/index.jsx` - Configuration UI component

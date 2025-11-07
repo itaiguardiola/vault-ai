@@ -2,7 +2,7 @@
 
 ## Overview
 
-OP Vault now includes comprehensive OCR support using **Tesseract OCR** to extract text from scanned PDFs and image files. This feature automatically detects when documents need OCR processing and falls back seamlessly when regular text extraction fails or yields insufficient text.
+Askara now includes comprehensive OCR support using **Tesseract OCR** to extract text from scanned PDFs and image files. This feature automatically detects when documents need OCR processing and falls back seamlessly when regular text extraction fails or yields insufficient text.
 
 ## Supported File Types
 

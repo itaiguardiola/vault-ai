@@ -1,6 +1,6 @@
 # 📚 Document Library Feature
 
-A complete document management system for OP Vault that allows users to view, search, and delete their uploaded documents through an intuitive web interface.
+A complete document management system for Askara that allows users to view, search, and delete their uploaded documents through an intuitive web interface.
 
 ## 🎯 Overview
 
@@ -185,7 +185,7 @@ type VectorDB interface {
 - `GetDocuments()` - Groups points by document name
 - `DeleteCollection()` - Deletes a Qdrant collection
 
-**3. API Handlers** (`vault-web-server/postapi/documents.go`)
+**3. API Handlers** (`askara-web-server/postapi/documents.go`)
 - `DocumentsListHandler` - List all collections and documents
 - `DocumentsGetHandler` - Get documents for a collection
 - `DocumentsDeleteHandler` - Delete a collection
@@ -316,13 +316,13 @@ User uploads related documents
 ### New Files Created (3)
 - `components/Pages/DocumentsPage/index.jsx` - 289 lines
 - `components/Pages/DocumentsPage/index.less` - 383 lines
-- `vault-web-server/postapi/documents.go` - 140 lines
+- `askara-web-server/postapi/documents.go` - 140 lines
 
 ### Files Modified (7)
 - `vectordb/vectordb.go` - Added 4 interface methods
 - `vectordb/qdrant/qdrant.go` - Added 173 lines (4 methods)
 - `vectordb/pinecone/pinecone.go` - Added stub implementations
-- `vault-web-server/main.go` - Added 4 routes
+- `askara-web-server/main.go` - Added 4 routes
 - `components/routes.jsx` - Added DocumentsPage route
 - `components/Pages/LandingPage/index.jsx` - Added Documents button
 - `components/Pages/LandingPage/index.less` - Updated header styles
@@ -460,7 +460,7 @@ Possible additions for the Document Library:
 
 ## 🎉 Summary
 
-The Document Library feature transforms OP Vault into a complete document management system. Users can now:
+The Document Library feature transforms Askara into a complete document management system. Users can now:
 
 ✅ **See** all their uploaded documents in one place
 ✅ **Search** for specific files or collections
@@ -468,7 +468,7 @@ The Document Library feature transforms OP Vault into a complete document manage
 ✅ **Manage** storage by deleting old collections
 ✅ **Navigate** easily with intuitive UI
 
-This feature makes OP Vault more user-friendly and professional, eliminating the need for database tools or CLI commands to manage documents.
+This feature makes Askara more user-friendly and professional, eliminating the need for database tools or CLI commands to manage documents.
 
 ---
 

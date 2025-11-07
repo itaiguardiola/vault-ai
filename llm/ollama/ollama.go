@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/pashpashpash/vault/chunk"
+	"github.com/itaiguardiola/askara/chunk"
 )
 
 const (

@@ -3,7 +3,7 @@ package llm
 import (
 	"context"
 
-	"github.com/pashpashpash/vault/chunk"
+	"github.com/itaiguardiola/askara/chunk"
 )
 
 // Client is an interface for LLM providers (OpenAI, Ollama, etc.)

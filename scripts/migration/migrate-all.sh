@@ -39,7 +39,7 @@ fi
 echo "Creating backup..."
 BACKUP_NAME="vault-ai-backup-$(date +%Y%m%d-%H%M%S).tar.gz"
 cd ..
-tar -czf "$BACKUP_NAME" vault-ai/ --exclude=vault-ai/node_modules --exclude=vault-ai/.git
+tar -czf "$BACKUP_NAME" --exclude='vault-ai/node_modules' --exclude='vault-ai/.git' vault-ai/
 echo "  ✓ Backup created: $(pwd)/$BACKUP_NAME"
 cd "$PROJECT_ROOT"
 echo ""

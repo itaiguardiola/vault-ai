@@ -1,13 +1,13 @@
-# OP Vault - Local Edition
+# Askara
 
-OP Vault is a document-based question-answering system that allows you to upload your own custom knowledgebase files and ask questions about their contents. This version runs **completely locally** without any internet connection or cloud services using Ollama (local LLM) + Qdrant (local vector database).
+Askara is a document-based question-answering system that allows you to upload your own custom knowledgebase files and ask questions about their contents. This version runs **completely locally** without any internet connection or cloud services using Ollama (local LLM) + Qdrant (local vector database).
 
 **Original version**: [vault.pash.city](https://vault.pash.city) - used OpenAI + Pinecone (cloud-based)
 **This version**: Fully local - uses Ollama + Qdrant (no internet required)
 
 ## 🚀 Quick Start with Docker (Recommended!)
 
-The easiest way to run OP Vault is with Docker:
+The easiest way to run Askara is with Docker:
 
 ```bash
 docker-compose up
@@ -19,22 +19,22 @@ Then visit **http://localhost:8100** and you're ready to go!
 
 ---
 
-<img width="512" alt="Screen Shot 2023-04-09 at 1 53 33 AM" src="/static/img/common/vault_library.png">
+<img width="512" alt="Screen Shot 2023-04-09 at 1 53 33 AM" src="/static/img/common/askara_library.png">
 
 With quick setup, you can launch your own version of this Golang server along with a user-friendly React frontend that allows users to ask OpenAI questions about the specific knowledge base provided. The primary focus is on human-readable content like books, letters, and other documents, making it a practical and valuable tool for knowledge extraction and question-answering. You can upload an entire library's worth of books and documents and recieve pointed answers along with the name of the file and specific section within the file that the answer is based on!
 
 <img width="1498" alt="Screen Shot 2023-04-17 at 6 23 00 PM" src="https://user-images.githubusercontent.com/20898225/232645187-fff56d2b-f654-4c92-b061-4670734b2764.png">
 
-## What can you do with OP Vault?
+## What can you do with Askara?
 
-With The Vault, you can:
+With Askara, you can:
 
 -   Upload a variety of popular document types via a simple react frontend to create a custom knowledge base
 -   **OCR support** for scanned PDFs and images - automatically extracts text using Tesseract
 -   Retrieve accurate and relevant answers based on the content of your uploaded documents
 -   See the filenames and specific context snippets that inform the answer
 -   Explore the power of local AI models in a user-friendly interface
--   Load entire libraries' worth of books into The Vault
+-   Load entire libraries' worth of books into Askara
 -   **Manage documents** through the built-in Document Library at http://localhost:8100/documents
 -   **Configure settings** through the built-in web UI at http://localhost:8100/config
 
@@ -189,7 +189,7 @@ open http://localhost:8100
 
 ## Screenshots:
 
-In the example screenshots, I uploaded a couple of books by Plato and some letters by Alexander Hamilton, showcasing the ability of OP Vault to answer questions based on the uploaded content.
+In the example screenshots, I uploaded a couple of books by Plato and some letters by Alexander Hamilton, showcasing the ability of Askara to answer questions based on the uploaded content.
 
 ### Uploading files
 
@@ -210,11 +210,11 @@ The golang server uses POST APIs to process incoming uploads and respond to ques
 
 2.  `/api/questions` for answering questions
 
-All api endpoints are declared in the [vault-web-server/main.go](vault-web-server/main.go) file.
+All api endpoints are declared in the [askara-web-server/main.go](askara-web-server/main.go) file.
 
 ### Uploading files and processing them into embeddings
 
-The [vault-web-server/postapi/fileupload.go](vault-web-server/postapi/fileupload.go) file contains the `UploadHandler` logic for handling incoming uploads on the backend.
+The [askara-web-server/postapi/fileupload.go](askara-web-server/postapi/fileupload.go) file contains the `UploadHandler` logic for handling incoming uploads on the backend.
 The UploadHandler function in the postapi package is responsible for handling file uploads (with a maximum total upload size of 50 MB) and processing them into embeddings to store in Qdrant. It accepts PDF, epub, .docx, and plain text files, extracts text from them, and divides the content into chunks. Using **Ollama's local embedding model (nomic-embed-text)**, it obtains embeddings for each chunk and upserts (inserts or updates) the embeddings into **Qdrant (local vector database)**. The function returns a JSON response containing information about the uploaded files and their processing status.
 
 1. Limit the size of the request body to MAX_TOTAL_UPLOAD_SIZE (300 MB).
@@ -244,7 +244,7 @@ This metadata is useful for providing context to the embeddings and is used to d
 
 ### Answering questions
 
-The `QuestionHandler` function in [vault-web-server/postapi/questions.go](vault-web-server/postapi/questions.go) is responsible for handling all incoming questions. When a question is entered on the frontend and the user presses "search" (or enter), the server uses the **Ollama embedding API** once again to get an embedding for the question (a.k.a. query vector). This query vector is used to query **Qdrant local database** to get the most relevant context for the question. Finally, a prompt is built by packing the most relevant context + the question in a prompt string that adheres to LLM token limits (the go tiktoken library is used to estimate token count). The answer is generated using **Ollama's local LLM (llama3 or mistral)** instead of cloud-based APIs.
+The `QuestionHandler` function in [askara-web-server/postapi/questions.go](askara-web-server/postapi/questions.go) is responsible for handling all incoming questions. When a question is entered on the frontend and the user presses "search" (or enter), the server uses the **Ollama embedding API** once again to get an embedding for the question (a.k.a. query vector). This query vector is used to query **Qdrant local database** to get the most relevant context for the question. Finally, a prompt is built by packing the most relevant context + the question in a prompt string that adheres to LLM token limits (the go tiktoken library is used to estimate token count). The answer is generated using **Ollama's local LLM (llama3 or mistral)** instead of cloud-based APIs.
 
 ### Frontend info
 
@@ -275,7 +275,7 @@ I hope you enjoy it (:
 
 ## Uploading larger files
 
-The max individual file size is set to 25MB and total upload size to 50MB. If you want to increase this limit, edit the `MAX_FILE_SIZE` and `MAX_TOTAL_UPLOAD_SIZE` constants in [fileupload.go](vault-web-server/postapi/fileupload.go#L21-L22).
+The max individual file size is set to 25MB and total upload size to 50MB. If you want to increase this limit, edit the `MAX_FILE_SIZE` and `MAX_TOTAL_UPLOAD_SIZE` constants in [fileupload.go](askara-web-server/postapi/fileupload.go#L21-L22).
 
 ### Supported Filetypes
 

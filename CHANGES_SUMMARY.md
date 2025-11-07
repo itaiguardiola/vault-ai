@@ -1,8 +1,8 @@
-# OP Vault - Local Transformation Summary
+# Askara - Local Transformation Summary
 
 ## What We Did
 
-Successfully transformed OP Vault from a cloud-dependent application into a **fully local, privacy-focused document Q&A system** that runs completely offline without any internet connection.
+Successfully transformed Askara from a cloud-dependent application into a **fully local, privacy-focused document Q&A system** that runs completely offline without any internet connection.
 
 ## Architecture Comparison
 
@@ -46,12 +46,12 @@ Created a clean interface to support multiple LLM providers:
 ### 3. Handler Updates
 Modified all API handlers to use the new LLM interface:
 
-- **`vault-web-server/postapi/handlercontext.go`**: Changed from `openai.Client` to `llm.Client`
-- **`vault-web-server/postapi/fileupload.go`**: Uses `llmClient.GetEmbeddings()` instead of OpenAI
-- **`vault-web-server/postapi/questions.go`**: Uses `llmClient.CreateChatCompletionSimple()` instead of OpenAI
+- **`askara-web-server/postapi/handlercontext.go`**: Changed from `openai.Client` to `llm.Client`
+- **`askara-web-server/postapi/fileupload.go`**: Uses `llmClient.GetEmbeddings()` instead of OpenAI
+- **`askara-web-server/postapi/questions.go`**: Uses `llmClient.CreateChatCompletionSimple()` instead of OpenAI
 
 ### 4. Main Application Bootstrap
-- **`vault-web-server/main.go`**:
+- **`askara-web-server/main.go`**:
   - Removed OpenAI initialization
   - Removed Pinecone initialization
   - Added Ollama client initialization with sensible defaults
@@ -195,7 +195,7 @@ Once deployed with internet access for initial setup:
 
 ## Migration Path for Existing Users
 
-If you have an existing OP Vault installation:
+If you have an existing Askara installation:
 
 1. **Pull latest code**: `git pull origin claude/app-documentation-011CUsvgGXoP3WZYerG2LbgK`
 2. **Install local services**: Follow SETUP_LOCAL.md
@@ -234,10 +234,10 @@ If you have an existing OP Vault installation:
 - `SETUP_LOCAL.md` - 288 lines
 
 ### Files Modified (6)
-- `vault-web-server/main.go` - Major refactor
-- `vault-web-server/postapi/handlercontext.go` - Interface change
-- `vault-web-server/postapi/fileupload.go` - LLM integration
-- `vault-web-server/postapi/questions.go` - LLM integration
+- `askara-web-server/main.go` - Major refactor
+- `askara-web-server/postapi/handlercontext.go` - Interface change
+- `askara-web-server/postapi/fileupload.go` - LLM integration
+- `askara-web-server/postapi/questions.go` - LLM integration
 - `vectordb/qdrant/qdrant.go` - Vector dimension update
 - `README.md` - Complete rewrite
 
@@ -251,7 +251,7 @@ If you have an existing OP Vault installation:
 
 **Branch**: `claude/app-documentation-011CUsvgGXoP3WZYerG2LbgK`
 **Commit**: `bfd2d6e`
-**Message**: "Transform OP Vault to run completely locally without internet"
+**Message**: "Transform Askara to run completely locally without internet"
 
 ## Next Steps
 

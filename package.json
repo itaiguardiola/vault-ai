@@ -1,24 +1,24 @@
 {
-  "name": "vault-web-server",
+  "name": "askara-web-server",
   "private": true,
   "version": "1.0.0",
-  "description": "vault core website",
+  "description": "askara core website",
   "main": "index.js",
   "scripts": {
-    "start": "bash -c 'source ./scripts/source-me.sh && ./scripts/go-compile.sh ./vault-web-server && echo && ./bin/vault-web-server'",
+    "start": "bash -c 'source ./scripts/source-me.sh && ./scripts/go-compile.sh ./askara-web-server && echo && ./bin/askara-web-server'",
     "dev": "webpack --progress --watch",
-    "postinstall": "bash -c 'source ./scripts/source-me.sh && ./scripts/go-compile.sh ./vault-web-server'"
+    "postinstall": "bash -c 'source ./scripts/source-me.sh && ./scripts/go-compile.sh ./askara-web-server'"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/pashpashpash/vault.git"
+    "url": "git+https://github.com/itaiguardiola/askara.git"
   },
   "author": "pashpashpash",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/pashpashpash/vault/issues"
+    "url": "https://github.com/itaiguardiola/askara/issues"
   },
-  "homepage": "https://github.com/pashpashpash/vault#readme",
+  "homepage": "https://github.com/itaiguardiola/askara#readme",
   "dependencies": {
     "@babel/plugin-transform-runtime": "^7.21.4",
     "crypto-browserify": "^3.12.0",

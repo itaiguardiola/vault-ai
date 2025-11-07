@@ -1,7 +1,7 @@
 {
     "vault.app/": {
-        "PageTitle": "The Vault",
-        "PageIcon": "/img/logos/vault-favicon.png",
+        "PageTitle": "Askara",
+        "PageIcon": "/img/logos/askara-favicon.png",
         "MetaTitle": "The Vault | AI with Long-term Memory",
         "MetaDescription": "Upload any number of files (pdf, text, epub) and use them as context when asking OpenAI questions.",
         "MetaVideo": "!",

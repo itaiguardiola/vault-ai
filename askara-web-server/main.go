@@ -16,12 +16,12 @@ import (
 	"compress/gzip"
 	"io"
 
-	"github.com/pashpashpash/vault/llm/ollama"
-	"github.com/pashpashpash/vault/serverutil"
-	"github.com/pashpashpash/vault/vectordb"
-	"github.com/pashpashpash/vault/vectordb/qdrant"
+	"github.com/itaiguardiola/askara/llm/ollama"
+	"github.com/itaiguardiola/askara/serverutil"
+	"github.com/itaiguardiola/askara/vectordb"
+	"github.com/itaiguardiola/askara/vectordb/qdrant"
 
-	"github.com/pashpashpash/vault/vault-web-server/postapi"
+	"github.com/itaiguardiola/askara/askara-web-server/postapi"
 
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
@@ -117,7 +117,7 @@ func main() {
 	mx.HandleFunc("/api/documents/{uuid}/stats", handlerContext.CollectionStatsHandler).Methods("GET")
 
 	// Path Routing Rules: Static Handlers
-	mx.HandleFunc("/github", StaticRedirectHandler("https://github.com/pashpashpash/vault"))
+	mx.HandleFunc("/github", StaticRedirectHandler("https://github.com/itaiguardiola/askara"))
 	mx.PathPrefix("/").Handler(ReactFileServer(http.Dir(serverutil.WebAbs(""))))
 
 	// Start up web server
@@ -150,11 +150,11 @@ func ServeIndex(w http.ResponseWriter, r *http.Request, meta serverutil.SiteConf
 	//set the host Manually when on local host
 	if r.Host == "localhost:8100" {
 		currentHost = "vault.pash.city"
-		currentSite = "vault"
+		currentSite = "askara"
 
 	} else {
 		currentHost = r.Host
-		currentSite = "vault"
+		currentSite = "askara"
 	}
 
 	currentpath := currentHost + r.URL.Path
@@ -203,8 +203,8 @@ func ServeIndex(w http.ResponseWriter, r *http.Request, meta serverutil.SiteConf
 		"Upload any number of files (pdf, text, epub) and use them as context when asking OpenAI questions.")
 	localSiteConfig["TwitterUsername"] = replaceEmpty(localSiteConfig["TwitterUsername"], "@pashmerepat")
 	localSiteConfig["MetaKeywords"] = replaceEmpty(localSiteConfig["MetaKeywords"], "OpenAI, Pinecone, ChatGPT")
-	localSiteConfig["PageTitle"] = replaceEmpty(localSiteConfig["PageTitle"], "The Vault | OP Question-Answer Stack")
-	localSiteConfig["PageIcon"] = replaceEmpty(localSiteConfig["Icon"], "/img/logos/vault-favicon.png")
+	localSiteConfig["PageTitle"] = replaceEmpty(localSiteConfig["PageTitle"], "Askara | AI Question-Answer System")
+	localSiteConfig["PageIcon"] = replaceEmpty(localSiteConfig["Icon"], "/img/logos/askara-favicon.png")
 	localSiteConfig["content"] = replaceEmpty(localSiteConfig["content"], "https://i.imgur.com/6YSvyEV.png")
 	localSiteConfig["contentType"] = replaceEmpty(localSiteConfig["contentType"], "og:image")
 	localSiteConfig["ImageHeight"] = replaceEmpty(localSiteConfig["ImageHeight"], "1024")

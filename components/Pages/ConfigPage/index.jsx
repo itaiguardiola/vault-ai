@@ -121,7 +121,7 @@ const ConfigPage = (props: Props) => {
                 <div className={s.header}>
                     <h1>⚙️ Configuration</h1>
                     <p className={s.subtitle}>
-                        Configure your local OP Vault installation
+                        Configure your local Askara installation
                     </p>
                 </div>
 

@@ -1,6 +1,6 @@
-# Docker Setup Guide - OP Vault Local Edition
+# Docker Setup Guide - Askara Local Edition
 
-This guide explains how to run OP Vault completely locally using Docker. Everything runs in containers - no manual installation required!
+This guide explains how to run Askara completely locally using Docker. Everything runs in containers - no manual installation required!
 
 ## 🚀 Quick Start (One Command!)
 
@@ -57,7 +57,7 @@ The docker-compose setup includes 4 services:
 
 ### Services
 
-1. **vault-app**: The main OP Vault application
+1. **vault-app**: The main Askara application
    - Ports: 8100 (web interface)
    - Depends on: Qdrant, Ollama
 
